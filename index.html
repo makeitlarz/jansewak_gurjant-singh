@@ -423,18 +423,28 @@
       document.getElementById('bannerEditorPanel').classList.add('hidden');
     }
 
-    function saveBannerEditor() {
-      if (pendingBannerImage) {
-        currentBannerImage = pendingBannerImage;
-        localStorage.setItem('ward_banner_pic', currentBannerImage);
-        saveSettingToSheet('bannerPic', currentBannerImage);
-        pendingBannerImage = '';
+    async function saveBannerEditor() {
+      if (!isPanchMode) return alert('पहले Admin Mode में लॉगिन करें।');
+      const saveButton = document.querySelector('#bannerEditorPanel button[onclick="saveBannerEditor()"]');
+      if (saveButton) { saveButton.disabled = true; saveButton.innerText = 'सेव हो रहा है...'; }
+      try {
+        if (pendingBannerImage) {
+          const savedBannerUrl = await saveSettingToSheet('bannerPic', pendingBannerImage);
+          currentBannerImage = savedBannerUrl;
+          localStorage.setItem('ward_banner_pic', savedBannerUrl);
+          setBannerImage(savedBannerUrl);
+          pendingBannerImage = '';
+        }
+        const savedConfig = await saveSettingToSheet('bannerConfig', JSON.stringify(bannerConfig));
+        localStorage.setItem('ward_banner_config', typeof savedConfig === 'string' ? savedConfig : JSON.stringify(savedConfig));
+        applyBannerConfig();
+        document.getElementById('bannerEditorPanel').classList.add('hidden');
+        alert('बैनर फोटो और उसकी फिटिंग Google Sheet में सेव हो गई। अब यह सभी मोबाइल पर दिखेगी।');
+      } catch (err) {
+        alert('बैनर सेव नहीं हुआ: ' + err.message);
+      } finally {
+        if (saveButton) { saveButton.disabled = false; saveButton.innerText = 'बैनर सेव करें'; }
       }
-      localStorage.setItem('ward_banner_config', JSON.stringify(bannerConfig));
-      saveSettingToSheet('bannerConfig', JSON.stringify(bannerConfig));
-      applyBannerConfig();
-      document.getElementById('bannerEditorPanel').classList.add('hidden');
-      alert('बैनर और उसकी फिटिंग सेटिंग सेव कर दी गई है।');
     }
 
     function fetchDataFromSheet() {
@@ -481,6 +491,11 @@
         delete window[callbackName];
       };
 
+      script.onerror = function() {
+        console.error('Google Sheet से फोटो/डेटा लोड नहीं हुआ। Apps Script URL और deployment जाँचें।');
+        if (script.parentNode) script.parentNode.removeChild(script);
+        delete window[callbackName];
+      };
       script.src = SCRIPT_URL + "?action=getData&callback=" + callbackName;
       document.body.appendChild(script);
     }
@@ -508,33 +523,102 @@
       document.body.appendChild(script);
     }
 
-    function saveSettingToSheet(key, value) {
-      // POST keeps large image data out of the URL. Apps Script stores images in Drive
-      // and saves only their public view URL in the Settings sheet.
-      fetch(SCRIPT_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ action: 'saveSettings', key: key, value: value })
-      }).catch(function(error) {
-        console.error('सेटिंग सेव नहीं हो सकी:', error);
-        alert('सेटिंग भेजने में समस्या आई। इंटरनेट और Apps Script deployment जाँचें।');
+    // Apps Script में फोटो Drive पर सेव होती है और Settings शीट में उसका URL रखा जाता है।
+    // POST के बाद JSONP से दोबारा पढ़कर पुष्टि की जाती है, ताकि केवल इसी मोबाइल की localStorage पर निर्भरता न रहे।
+    function readSettingsFromServer() {
+      return new Promise(function(resolve, reject) {
+        const callbackName = 'jsonpSettingsCheck_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
+        const script = document.createElement('script');
+        let finished = false;
+        const cleanup = function() {
+          if (script.parentNode) script.parentNode.removeChild(script);
+          delete window[callbackName];
+          clearTimeout(timer);
+        };
+        const timer = setTimeout(function() {
+          if (finished) return;
+          finished = true;
+          cleanup();
+          reject(new Error('Google Sheet से सेव की पुष्टि नहीं मिली। Apps Script URL और deployment जाँचें।'));
+        }, 20000);
+        window[callbackName] = function(data) {
+          if (finished) return;
+          finished = true;
+          cleanup();
+          if (data && data.result === 'success') resolve(data.settings || {});
+          else reject(new Error((data && data.message) || 'Google Sheet से डेटा नहीं पढ़ा जा सका।'));
+        };
+        script.onerror = function() {
+          if (finished) return;
+          finished = true;
+          cleanup();
+          reject(new Error('Google Sheet से कनेक्शन नहीं हो पाया।'));
+        };
+        script.src = SCRIPT_URL + '?action=getData&callback=' + callbackName;
+        document.body.appendChild(script);
       });
     }
 
-    function handleProfileUpload(e) {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(evt) {
-          const imgUrl = evt.target.result;
-          document.getElementById('headerProfilePic').src = imgUrl;
-          localStorage.setItem('ward_profile_pic', imgUrl);
-          saveSettingToSheet('profilePic', imgUrl);
-          alert("प्रोफाइल फोटो अपडेट और सेव हो गई है!");
-        };
-        reader.readAsDataURL(file);
+    async function saveSettingToSheet(key, value) {
+      if (!SCRIPT_URL || SCRIPT_URL.indexOf('/exec') === -1) {
+        throw new Error('index.html में सही Apps Script Web App URL नहीं मिला।');
       }
+      // Code.gs saveSettings action में यही PIN जाँचता है।
+      await fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'saveSettings', key: key, value: value, pin: ADMIN_PIN })
+      });
+
+      const settings = await readSettingsFromServer();
+      const saved = settings[key];
+      if (saved === undefined || saved === null || saved === '') {
+        throw new Error('सेटिंग Google Sheet में सेव नहीं हुई। Apps Script की Executions में error जाँचें।');
+      }
+
+      if (key === 'bannerPic' || key === 'profilePic') {
+        if (typeof saved !== 'string' || !/^https:\/\//i.test(saved)) {
+          throw new Error('फोटो Drive में सेव नहीं हुई। Drive permission और Apps Script authorization जाँचें।');
+        }
+      }
+      if (key === 'workUpdates') {
+        let savedList;
+        try { savedList = typeof saved === 'string' ? JSON.parse(saved) : saved; }
+        catch (e) { throw new Error('विकास फोटो की सूची Sheet से सही नहीं पढ़ी जा सकी।'); }
+        const wantedList = typeof value === 'string' ? JSON.parse(value) : value;
+        if (!Array.isArray(savedList) || !Array.isArray(wantedList) || savedList.length !== wantedList.length) {
+          throw new Error('सभी विकास फोटो Google Sheet में सेव नहीं हुईं।');
+        }
+        workUpdates = savedList;
+        localStorage.setItem('ward_work_updates', JSON.stringify(savedList));
+        return savedList;
+      }
+      return saved;
+    }
+
+    async function handleProfileUpload(e) {
+      if (!isPanchMode) return alert('पहले Admin Mode में लॉगिन करें।');
+      const file = e.target.files[0];
+      if (!file) return;
+      if (!file.type.startsWith('image/') || file.size > 3 * 1024 * 1024) {
+        alert('कृपया 3 MB से छोटी फोटो चुनें।');
+        e.target.value = '';
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = async function(evt) {
+        try {
+          const savedUrl = await saveSettingToSheet('profilePic', evt.target.result);
+          document.getElementById('headerProfilePic').src = savedUrl;
+          localStorage.setItem('ward_profile_pic', savedUrl);
+          alert('प्रोफाइल फोटो Google Sheet में सेव हो गई। अब यह सभी मोबाइल पर दिखेगी।');
+        } catch (err) {
+          alert('प्रोफाइल फोटो सेव नहीं हुई: ' + err.message);
+        }
+      };
+      reader.readAsDataURL(file);
+      e.target.value = '';
     }
 
     function handleBannerUpload(e) {
@@ -564,18 +648,19 @@
     }
 
     function addWorkUpdate() {
+      if (!isPanchMode) return alert('पहले Admin Mode में लॉगिन करें।');
       const title = document.getElementById('workTitle').value.trim();
       const desc = document.getElementById('workDesc').value.trim();
       const fileInput = document.getElementById('workImage');
       const file = fileInput.files[0];
-
-      if (!title || !file) {
-        alert("कृपया शीर्षक और फोटो दोनों अपलोड करें!");
+      if (!title || !file) return alert('कृपया शीर्षक और फोटो दोनों अपलोड करें!');
+      if (!file.type.startsWith('image/') || file.size > 3 * 1024 * 1024) {
+        alert('कृपया 3 MB से छोटी फोटो चुनें।');
         return;
       }
 
       const reader = new FileReader();
-      reader.onload = function(evt) {
+      reader.onload = async function(evt) {
         const newUpdate = {
           id: Date.now(),
           title: title,
@@ -583,26 +668,31 @@
           image: evt.target.result,
           date: new Date().toLocaleDateString('hi-IN')
         };
-        workUpdates.unshift(newUpdate);
-        localStorage.setItem('ward_work_updates', JSON.stringify(workUpdates));
-        saveSettingToSheet('workUpdates', JSON.stringify(workUpdates));
-
-        document.getElementById('workTitle').value = '';
-        document.getElementById('workDesc').value = '';
-        fileInput.value = '';
-
-        renderWorkGallery();
-        alert("विकास कार्य का अपडेट प्रकाशित कर दिया गया है!");
+        const nextUpdates = [newUpdate].concat(workUpdates);
+        try {
+          const savedList = await saveSettingToSheet('workUpdates', JSON.stringify(nextUpdates));
+          workUpdates = savedList;
+          document.getElementById('workTitle').value = '';
+          document.getElementById('workDesc').value = '';
+          fileInput.value = '';
+          renderWorkGallery();
+          alert('विकास कार्य की फोटो Google Sheet में सेव हो गई। अब यह सभी मोबाइल पर दिखेगी।');
+        } catch (err) {
+          alert('विकास कार्य की फोटो सेव नहीं हुई: ' + err.message);
+        }
       };
       reader.readAsDataURL(file);
     }
 
-    function deleteWorkUpdate(id) {
-      if(confirm("क्या आप इस कार्य अपडेट को हटाना चाहते हैं?")) {
-        workUpdates = workUpdates.filter(w => w.id !== id);
-        localStorage.setItem('ward_work_updates', JSON.stringify(workUpdates));
-        saveSettingToSheet('workUpdates', JSON.stringify(workUpdates));
+    async function deleteWorkUpdate(id) {
+      if (!isPanchMode || !confirm('क्या आप इस कार्य अपडेट को हटाना चाहते हैं?')) return;
+      const nextUpdates = workUpdates.filter(w => String(w.id) !== String(id));
+      try {
+        const savedList = await saveSettingToSheet('workUpdates', JSON.stringify(nextUpdates));
+        workUpdates = savedList;
         renderWorkGallery();
+      } catch (err) {
+        alert('फोटो हटाई नहीं जा सकी: ' + err.message);
       }
     }
 
