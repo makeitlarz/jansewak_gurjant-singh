@@ -307,6 +307,7 @@
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzVwCRkHn7uGOq82d8ESSN-JNTpVNJzsMLG3oezla9vFzFfGeP5AJZFZRHD3X6GwVenmA/exec"; 
 
     let isPanchMode = false;
+    let currentAdminPin = '';
     let issues = [];
     let customLinks = JSON.parse(localStorage.getItem('ward_custom_links')) || [];
     let workUpdates = JSON.parse(localStorage.getItem('ward_work_updates')) || [];
@@ -423,18 +424,28 @@
       document.getElementById('bannerEditorPanel').classList.add('hidden');
     }
 
-    function saveBannerEditor() {
+    async function saveBannerEditor() {
+      const saveTasks = [];
+
       if (pendingBannerImage) {
         currentBannerImage = pendingBannerImage;
         localStorage.setItem('ward_banner_pic', currentBannerImage);
-        saveSettingToSheet('bannerPic', currentBannerImage);
-        pendingBannerImage = '';
+        saveTasks.push(saveSettingToSheet('bannerPic', currentBannerImage));
       }
-      localStorage.setItem('ward_banner_config', JSON.stringify(bannerConfig));
-      saveSettingToSheet('bannerConfig', JSON.stringify(bannerConfig));
-      applyBannerConfig();
-      document.getElementById('bannerEditorPanel').classList.add('hidden');
-      alert('बैनर और उसकी फिटिंग सेटिंग सेव कर दी गई है।');
+
+      const configValue = JSON.stringify(bannerConfig);
+      localStorage.setItem('ward_banner_config', configValue);
+      saveTasks.push(saveSettingToSheet('bannerConfig', configValue));
+
+      const results = await Promise.all(saveTasks);
+      if (results.every(Boolean)) {
+        pendingBannerImage = '';
+        applyBannerConfig();
+        document.getElementById('bannerEditorPanel').classList.add('hidden');
+        alert('बैनर Google Drive और Google Sheet में सेव हो गया है। अब दूसरे मोबाइल पर भी अपडेट दिखना चाहिए।');
+      } else {
+        alert('बैनर सेव होने की पुष्टि नहीं हो सकी। कृपया इंटरनेट, Apps Script deployment और Google Drive permissions जाँचें।');
+      }
     }
 
     function fetchDataFromSheet() {
@@ -508,18 +519,83 @@
       document.body.appendChild(script);
     }
 
-    function saveSettingToSheet(key, value) {
-      // POST keeps large image data out of the URL. Apps Script stores images in Drive
-      // and saves only their public view URL in the Settings sheet.
-      fetch(SCRIPT_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ action: 'saveSettings', key: key, value: value })
-      }).catch(function(error) {
-        console.error('सेटिंग सेव नहीं हो सकी:', error);
-        alert('सेटिंग भेजने में समस्या आई। इंटरनेट और Apps Script deployment जाँचें।');
+    function readSettingFromSheet(key) {
+      return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        const callbackName = 'jsonpSettingCheck_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
+        const timeout = setTimeout(() => {
+          cleanup();
+          reject(new Error('Google Sheet से पुष्टि का समय समाप्त हो गया।'));
+        }, 15000);
+
+        function cleanup() {
+          clearTimeout(timeout);
+          if (script.parentNode) script.parentNode.removeChild(script);
+          delete window[callbackName];
+        }
+
+        window[callbackName] = function(data) {
+          cleanup();
+          if (data && data.result === 'success' && data.settings) {
+            resolve(data.settings[key]);
+          } else {
+            reject(new Error('Google Sheet से सेटिंग पढ़ी नहीं जा सकी।'));
+          }
+        };
+
+        script.onerror = function() {
+          cleanup();
+          reject(new Error('Apps Script से संपर्क नहीं हो पाया।'));
+        };
+
+        script.src = SCRIPT_URL + '?action=getData&callback=' + callbackName + '&_=' + Date.now();
+        document.body.appendChild(script);
       });
+    }
+
+    function settingValueMatches(key, savedValue, sentValue) {
+      if (key === 'bannerPic' || key === 'profilePic') {
+        // Apps Script data:image को Drive URL में बदलकर Sheet में सेव करता है.
+        return typeof savedValue === 'string' &&
+          savedValue.indexOf('https://drive.google.com/uc?export=view&id=') === 0;
+      }
+      if (key === 'workUpdates') return !!savedValue;
+      return String(savedValue == null ? '' : savedValue) === String(sentValue == null ? '' : sentValue);
+    }
+
+    async function saveSettingToSheet(key, value) {
+      if (!currentAdminPin) {
+        alert('सेटिंग सेव करने के लिए पहले Admin PIN से लॉगिन करें।');
+        return false;
+      }
+
+      try {
+        // no-cors POST बड़े फोटो डेटा को URL में डाले बिना Apps Script तक भेजता है.
+        await fetch(SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'saveSettings',
+            key: key,
+            value: value,
+            pin: currentAdminPin
+          })
+        });
+
+        // POST का no-cors response पढ़ा नहीं जा सकता, इसलिए Sheet को JSONP से दोबारा पढ़कर पुष्टि करें.
+        for (let attempt = 0; attempt < 8; attempt++) {
+          await new Promise(resolve => setTimeout(resolve, attempt === 0 ? 1200 : 1000));
+          const savedValue = await readSettingFromSheet(key);
+          if (settingValueMatches(key, savedValue, value)) return true;
+        }
+
+        throw new Error('सेटिंग Google Sheet में दिखाई नहीं दी।');
+      } catch (error) {
+        console.error('सेटिंग सेव नहीं हो सकी:', error);
+        alert('सेटिंग सेव नहीं हुई: ' + (error.message || error));
+        return false;
+      }
     }
 
     function handleProfileUpload(e) {
@@ -691,6 +767,7 @@
         document.getElementById('pinModal').classList.remove('hidden');
       } else {
         isPanchMode = false;
+        currentAdminPin = '';
         document.getElementById('modeText').innerText = "समाज सेवक मोड (Gurjant Singh)";
         document.getElementById('modeIcon').className = "fa-solid fa-lock text-amber-400";
         document.getElementById('uploadPicBtnHeader').classList.add('hidden');
@@ -717,6 +794,7 @@
     function verifyPin() {
       const enteredPin = document.getElementById('pinInput').value;
       if (enteredPin === ADMIN_PIN) {
+        currentAdminPin = enteredPin;
         isPanchMode = true;
         closePinModal();
         document.getElementById('modeText').innerText = "नागरिक मोड (Voter View)";
@@ -919,13 +997,13 @@
   </script>
 
   <script>
-    // 1. Right-click disable karna
+    // Right-click context menu disable
     document.addEventListener('contextmenu', function(e) {
       e.preventDefault();
       return false;
     });
 
-    // 2. Keyboard shortcuts block karna (Ctrl+U, F12, Ctrl+Shift+I/J/C)
+    // Common browser shortcut deterrents (not full source-code protection)
     document.addEventListener('keydown', function(e) {
       if (
         e.keyCode === 123 ||
