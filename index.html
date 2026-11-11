@@ -917,5 +917,26 @@
       `).join('');
     }
   </script>
+
+  <script>
+    // 1. Right-click disable karna
+    document.addEventListener('contextmenu', function(e) {
+      e.preventDefault();
+      return false;
+    });
+
+    // 2. Keyboard shortcuts block karna (Ctrl+U, F12, Ctrl+Shift+I/J/C)
+    document.addEventListener('keydown', function(e) {
+      if (
+        e.keyCode === 123 ||
+        (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) ||
+        (e.ctrlKey && e.keyCode === 85)
+      ) {
+        e.preventDefault();
+        return false;
+      }
+    });
+  </script>
+
 </body>
 </html>
