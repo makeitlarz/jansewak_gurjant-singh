@@ -21,7 +21,7 @@
         <div class="relative group">
           <img id="headerProfilePic" src="https://via.placeholder.com/150/1e293b/f59e0b?text=GS" alt="Gurjant Singh" class="w-12 h-12 rounded-full border-2 border-amber-500 object-cover shadow-md">
           <!-- Profile Pic Edit Button (Hidden by default, shown when Admin mode is ON) -->
-          <label id="uploadPicBtnHeader" class="hidden absolute -bottom-1 -right-1 bg-amber-500 text-slate-950 text-xs w-6 h-6 rounded-full flex items-center justify-center cursor-pointer shadow-lg hover:scale-110 transition-all z-20">
+          <label id="uploadPicBtnHeader" class="hidden absolute -bottom-1 -right-1 bg-amber-500 text-slate-950 text-xs w-6 h-6 rounded-full flex items-center justify-center cursor-pointer shadow-lg hover:scale-110 transition-all z-30">
             <i class="fa-solid fa-camera"></i>
             <input type="file" accept="image/*" class="hidden" onchange="handleProfileUpload(event)">
           </label>
@@ -46,15 +46,15 @@
     <div class="relative bg-gradient-to-r from-amber-500/20 via-amber-600/15 to-amber-500/20 border-2 border-amber-500/50 rounded-2xl p-6 md:p-8 text-center shadow-xl overflow-hidden backdrop-blur-sm min-h-[180px] flex flex-col justify-center items-center bg-cover bg-center transition-all" id="mainBannerContainer">
       
       <!-- Banner Image Edit Button (Hidden by default, shown when Admin mode is ON) -->
-      <label id="uploadBannerBtn" class="hidden absolute top-3 right-3 bg-amber-500 text-slate-950 text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 cursor-pointer shadow-lg hover:scale-105 transition-all z-20">
-        <i class="fa-solid fa-camera"></i> बैनर बदलें
+      <label id="uploadBannerBtn" class="hidden absolute top-3 right-3 bg-amber-500 text-slate-950 text-xs md:text-sm px-3.5 py-2 rounded-lg font-bold flex items-center gap-2 cursor-pointer shadow-2xl hover:bg-amber-400 hover:scale-105 transition-all z-30 border border-slate-950">
+        <i class="fa-solid fa-camera text-base"></i> बैनर बदलें
         <input type="file" accept="image/*" class="hidden" onchange="handleBannerUpload(event)">
       </label>
 
       <!-- Semi transparent overlay for readability if image is set -->
-      <div id="bannerOverlay" class="absolute inset-0 bg-slate-950/70 hidden"></div>
+      <div id="bannerOverlay" class="absolute inset-0 bg-slate-950/70 hidden z-10"></div>
 
-      <div class="relative z-10">
+      <div class="relative z-20">
         <p class="text-amber-400 text-xs md:text-sm uppercase tracking-widest font-semibold mb-2">
           <i class="fa-solid fa-star"></i> जनसेवा ही मेरा संकल्प, जनहित ही मेरा लक्ष्य <i class="fa-solid fa-star"></i>
         </p>
