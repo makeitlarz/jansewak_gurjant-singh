@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Digital Ward Jana Seva Portal - Gurjant Singh</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Hind:wght@400;500;600;700&display=swap');
+    body { font-family: 'Hind', sans-serif; }
+  </style>
+</head>
+
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between">
+
+  <!-- Header -->
+  <header class="bg-slate-900 border-b border-amber-500/20 sticky top-0 z-50 shadow-md">
+    <div class="max-w-6xl mx-auto px-4 py-3.5 flex flex-wrap justify-between items-center gap-4">
+      <div class="flex items-center gap-3">
+        <div class="relative group">
+          <img id="headerProfilePic" src="https://via.placeholder.com/150/1e293b/f59e0b?text=GS" alt="Gurjant Singh" class="w-12 h-12 rounded-full border-2 border-amber-500 object-cover shadow-md">
+          <label id="uploadPicBtnHeader" class="hidden absolute -bottom-1 -right-1 bg-amber-500 text-slate-950 text-xs w-6 h-6 rounded-full flex items-center justify-center cursor-pointer shadow-lg hover:scale-110 transition-all">
+            <i class="fa-solid fa-camera"></i>
+            <input type="file" accept="image/*" class="hidden" onchange="handleProfileUpload(event)">
+          </label>
+        </div>
+        <div>
+          <h1 class="text-lg md:text-xl font-bold text-amber-400">डिजिटल वार्ड जन सेवा पोर्टल</h1>
+          <p class="text-xs text-slate-400">समस्या निवारण एवं विकास सुझाव केंद्र</p>
+        </div>
+      </div>
+
+      <button id="modeToggleBtn" onclick="handleModeClick()" type="button" class="cursor-pointer bg-slate-800 hover:bg-slate-700 text-amber-400 border border-amber-500/30 text-xs md:text-sm font-semibold px-4 py-2 rounded-lg transition-all flex items-center gap-2 shadow-sm active:scale-95">
+        <i id="modeIcon" class="fa-solid fa-lock text-amber-400"></i>
+        <span id="modeText">समाज सेवक मोड (Gurjant Singh)</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-6xl mx-auto px-4 py-6 flex-grow w-full space-y-6">
+
+    <!-- Banner Section with Admin Upload Option -->
+    <div class="relative bg-gradient-to-r from-amber-500/20 via-amber-600/15 to-amber-500/20 border-2 border-amber-500/50 rounded-2xl p-6 md:p-8 text-center shadow-xl overflow-hidden backdrop-blur-sm flex flex-col items-center justify-center">
+      
+      <!-- Admin Banner Image Upload Button -->
+      <label id="uploadBannerBtn" class="hidden absolute top-3 right-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs px-3 py-1.5 rounded-lg cursor-pointer shadow-md transition-all flex items-center gap-1.5 z-10">
+        <i class="fa-solid fa-image"></i> बैनर फोटो बदलें
+        <input type="file" accept="image/*" class="hidden" onchange="handleBannerUpload(event)">
+      </label>
+
+      <!-- Dynamic Banner Image (Optional Display) -->
+      <div id="bannerImageContainer" class="hidden mb-4 w-full max-h-64 overflow-hidden rounded-xl border border-amber-500/30">
+        <img id="bannerImage" src="" alt="Ward Banner" class="w-full h-full object-cover">
+      </div>
+
+      <p class="text-amber-400 text-xs md:text-sm uppercase tracking-widest font-semibold mb-2">
+        <i class="fa-solid fa-star"></i> जनसेवा ही मेरा संकल्प, जनहित ही मेरा लक्ष्य <i class="fa-solid fa-star"></i>
+      </p>
+      <h2 class="text-2xl md:text-4xl font-extrabold text-white tracking-wide mb-3 leading-tight">
+        आपका साथ, हमारा प्रयास : Gurjant Singh
+      </h2>
+      <div class="inline-flex items-center gap-3 bg-amber-500 text-slate-950 px-6 py-3 rounded-full text-lg md:text-2xl font-black shadow-lg hover:bg-amber-400 transition-all cursor-pointer my-2">
+        <i class="fa-solid fa-phone-volume animate-pulse"></i>
+        <a href="tel:9587513901">9587513901</a>
+      </div>
+    </div>
+
+    <!-- Admin Section: Add Work Updates / Photos -->
+    <div id="adminWorkSection" class="hidden bg-slate-900 border-2 border-amber-500/50 rounded-2xl p-6 shadow-xl space-y-4">
+      <div class="flex justify-between items-center border-b border-amber-500/20 pb-3">
+        <h3 class="text-base font-bold text-amber-400 flex items-center gap-2">
+          <i class="fa-solid fa-bullhorn"></i> नया विकास कार्य / समाचार पोस्ट करें (Admin Only)
+        </h3>
+        <span class="text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded font-bold">Admin Panel</span>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">कार्य/समाचार का शीर्षक *</label>
+          <input type="text" id="workTitle" placeholder="जैसे: वार्ड 11 में नई नाली का निर्माण पूरा" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-500">
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">कार्य की फोटो चुनें *</label>
+          <input type="file" id="workPhoto" accept="image/*" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-400 focus:outline-none focus:border-amber-500">
+        </div>
+      </div>
+      <div>
+        <label class="block text-xs text-slate-400 mb-1">विस्तृत विवरण</label>
+        <textarea id="workDesc" rows="2" placeholder="कार्य के बारे में संक्षिप्त जानकारी लिखें..." class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-500"></textarea>
+      </div>
+      <button onclick="addWorkUpdate()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-4 py-2 rounded-lg text-xs transition-all shadow-md cursor-pointer flex items-center gap-2">
+        <i class="fa-solid fa-upload"></i> नागरिकों के लिए अपडेट पोस्ट करें
+      </button>
+    </div>
+
+    <!-- Public View: Ward Works & Progress Gallery -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-lg">
+      <h3 class="text-lg font-bold text-amber-400 mb-4 flex items-center gap-2">
+        <i class="fa-solid fa-images"></i> हालिया विकास कार्य एवं वार्ड प्रगति
+      </h3>
+      <div id="worksContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Work Updates Cards will load here dynamically -->
+      </div>
+    </div>
+
+    <!-- Forms & Links Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      <!-- Form & Links Column -->
+      <div class="lg:col-span-1 space-y-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-lg">
+          <h3 class="text-lg font-bold text-amber-400 mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-pen-to-square"></i> समस्या या सुझाव दर्ज करें
+          </h3>
+
+          <form id="issueForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">आपका नाम *</label>
+              <input type="text" id="voterName" required placeholder="अपना नाम लिखें" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-500">
+            </div>
+
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">मोबाइल नंबर *</label>
+              <input type="tel" id="voterPhone" required pattern="[0-9]{10}" placeholder="10 अंको का मोबाइल नंबर" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-500">
+            </div>
+
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">प्रकार *</label>
+              <select id="issueType" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-500">
+                <option value="समस्या">समस्या (Complaint)</option>
+                <option value="सुझाव">सुझाव (Suggestion)</option>
+                <option value="मदद">विशेष मदद (Emergency/Help)</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">विषय (Category)</label>
+              <select id="issueCategory" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-500">
+                <option value="सड़क व नाली">सड़क व नाली</option>
+                <option value="पेयजल (पानी)">पेयजल (पानी)</option>
+                <option value="बिजली व स्ट्रीट लाइट">बिजली व स्ट्रीट लाइट</option>
+                <option value="सफाई व्यवस्था">सफाई व्यवस्था</option>
+                <option value="शिक्षा व स्कूल मदद">शिक्षा व स्कूल मदद</option>
+                <option value="बुजुर्ग सहायता">बुजुर्ग सहायता</option>
+                <option value="अन्य">अन्य</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">विस्तार से लिखें *</label>
+              <textarea id="issueDetails" rows="4" required placeholder="अपनी समस्या या सुझाव का विवरण दें..." class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-500"></textarea>
+            </div>
+
+            <button type="submit" id="submitBtn" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-lg transition-all text-sm shadow-md cursor-pointer">
+              सबमिट करें (Submit)
+            </button>
+          </form>
+        </div>
+
+        <!-- Links Box -->
+        <div class="bg-slate-900 border border-amber-500/30 rounded-2xl p-5 space-y-3 shadow-lg">
+          <h4 class="text-sm font-bold text-amber-400 flex items-center gap-2">
+            <i class="fa-solid fa-square-poll-vertical"></i> उपयोगी सरकारी लिंक्स (Quick Links)
+          </h4>
+          <div class="space-y-2">
+            <a href="https://voters.eci.gov.in/" target="_blank" class="flex items-center justify-between bg-slate-950 hover:bg-slate-800 border border-slate-800 p-2.5 rounded-xl text-xs text-slate-200">
+              <span class="flex items-center gap-2 text-amber-400 font-semibold"><i class="fa-solid fa-address-book"></i> आपकी मतदाता सूची (वोटर लिस्ट)</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-slate-500"></i>
+            </a>
+            <a href="https://egramswaraj.gov.in/" target="_blank" class="flex items-center justify-between bg-slate-950 hover:bg-slate-800 border border-slate-800 p-2.5 rounded-xl text-xs text-slate-200">
+              <span class="flex items-center gap-2 text-amber-400 font-semibold"><i class="fa-solid fa-landmark"></i> आपकी पंचायत में चल रहे विकास कार्यों की जानकारी</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-slate-500"></i>
+            </a>
+            <div id="dynamicLinksContainer" class="space-y-2"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Complaints List Column -->
+      <div class="lg:col-span-2 space-y-4">
+        <!-- FUTURE ADMIN SPACE -->
+        <div id="futureAdminSpace" class="hidden bg-slate-900 border-2 border-dashed border-amber-500/50 rounded-2xl p-6 shadow-xl space-y-4">
+          <div class="flex justify-between items-center border-b border-amber-500/20 pb-3">
+            <h3 class="text-sm font-bold text-amber-400 flex items-center gap-2">
+              <i class="fa-solid fa-screwdriver-wrench"></i> फ्यूचर एडमिन स्पेस (नया लिंक या जानकारी जोड़ने के लिए)
+            </h3>
+            <span class="text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded font-bold">Admin Only</span>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">नया लिंक शीर्षक (Title)</label>
+              <input type="text" id="newLinkTitle" placeholder="जैसे: वार्ड योजना फॉर्म" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-500">
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">वेबसाइट URL (Link)</label>
+              <input type="url" id="newLinkUrl" placeholder="https://example.com" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-500">
+            </div>
+          </div>
+          <button onclick="addNewCustomLink()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-4 py-2 rounded-lg text-xs transition-all shadow-sm">
+            + नया लिंक पोर्टल में जोड़ें
+          </button>
+        </div>
+
+        <!-- Pending Complaints Section -->
+        <div id="unapprovedSection" class="hidden bg-slate-900 border-2 border-amber-500/40 rounded-2xl p-6 shadow-xl">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-bold text-amber-400 flex items-center gap-2">
+              <i class="fa-solid fa-clock-rotate-left"></i> अप्रूवल के लिए लंबित शिकायतें (Admin Only)
+            </h3>
+            <span id="unapprovedCount" class="text-xs bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2.5 py-1 rounded-full font-bold">0 लंबित</span>
+          </div>
+          <div id="unapprovedContainer" class="space-y-3"></div>
+        </div>
+
+        <!-- Approved Complaints Section -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-lg">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-bold text-amber-400 flex items-center gap-2">
+              <i class="fa-solid fa-list-check"></i> स्वीकृत समस्याएँ एवं समाधान स्थिति
+            </h3>
+            <span id="totalCount" class="text-xs bg-slate-800 text-amber-400 border border-amber-500/20 px-2.5 py-1 rounded-full font-semibold">कुल स्वीकृत: 0</span>
+          </div>
+          <div id="issuesContainer" class="space-y-3"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- THANK YOU MODAL -->
+  <div id="thankYouModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border-2 border-amber-500 rounded-2xl p-6 max-w-md w-full shadow-2xl text-center space-y-4">
+      <div class="w-16 h-16 bg-amber-500/10 border-2 border-amber-500 rounded-full flex items-center justify-center text-amber-400 text-3xl mx-auto">
+        <i class="fa-solid fa-circle-check"></i>
+      </div>
+      <h3 class="text-xl font-extrabold text-amber-400">धन्यवाद! संदेश प्राप्त हुआ</h3>
+      <p class="text-slate-200 text-sm md:text-base">"आपकी समस्या/सुझाव दर्ज कर लिया गया है।"</p>
+      <p class="text-xs text-slate-400 italic">Gurjant Singh (जन सेवक)</p>
+      <button onclick="closeThankYouModal()" class="w-full bg-amber-500 text-slate-950 py-2.5 rounded-lg text-sm font-bold shadow-md cursor-pointer">ठीक है (OK)</button>
+    </div>
+  </div>
+
+  <!-- PIN MODAL -->
+  <div id="pinModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-amber-500/30 rounded-2xl p-6 max-w-sm w-full shadow-2xl space-y-4">
+      <div class="flex justify-between items-center">
+        <h4 class="text-amber-400 font-bold text-lg"><i class="fa-solid fa-lock"></i> PIN अनलॉक करें</h4>
+        <button onclick="closePinModal()" class="text-slate-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <p class="text-xs text-slate-300">समाज सेवक (Gurjant Singh) मोड अनलॉक करने के लिए Secret PIN दर्ज करें:</p>
+      <div>
+        <input type="password" id="pinInput" placeholder="PIN दर्ज करें" class="w-full bg-slate-950 border border-slate-700 text-amber-400 text-center font-mono text-xl tracking-widest rounded-lg py-2.5 focus:outline-none focus:border-amber-500">
+        <p id="pinError" class="text-xs text-red-400 mt-1 hidden">गलत PIN! कृपया पुनः प्रयास करें।</p>
+      </div>
+      <div class="flex gap-2">
+        <button onclick="closePinModal()" class="w-1/2 bg-slate-800 text-slate-300 py-2 rounded-lg text-sm font-semibold">रद्द करें</button>
+        <button onclick="verifyPin()" class="w-1/2 bg-amber-500 text-slate-950 py-2 rounded-lg text-sm font-bold">अनलॉक करें</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-slate-900 border-t border-amber-500/20 py-4 mt-8">
+    <div class="max-w-6xl mx-auto px-4 text-center">
+      <p class="text-xs font-bold text-amber-400 tracking-widest uppercase">ALL RIGHTS RESERVED TO CHACHIA GROUP @ 2026</p>
+    </div>
+  </footer>
+
+  <script>
+    const ADMIN_PIN = "3901";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwJD-PMaBgVwso7_xPyDRz8vOEy9vLxGLaZZNH5qoMbRb56dfHIU407kPp_R0rtwM8l/exec"; 
+
+    let isPanchMode = false;
+    let issues = [];
+    let customLinks = JSON.parse(localStorage.getItem('ward_custom_links')) || [];
+    let workUpdates = JSON.parse(localStorage.getItem('ward_work_updates')) || [];
+
+    window.onload = function() {
+      const savedProfile = localStorage.getItem('ward_profile_pic');
+      if(savedProfile) {
+        document.getElementById('headerProfilePic').src = savedProfile;
+      }
+      
+      const savedBanner = localStorage.getItem('ward_banner_pic');
+      if(savedBanner) {
+        document.getElementById('bannerImage').src = savedBanner;
+        document.getElementById('bannerImageContainer').classList.remove('hidden');
+      }
+
+      renderCustomLinks();
+      renderWorkUpdates();
+      fetchIssuesFromSheet();
+    };
+
+    // Banner Photo Upload Handler
+    function handleBannerUpload(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          document.getElementById('bannerImage').src = evt.target.result;
+          document.getElementById('bannerImageContainer').classList.remove('hidden');
+          localStorage.setItem('ward_banner_pic', evt.target.result);
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    // Work Update (Photo + Title + Desc) Handler
+    function addWorkUpdate() {
+      const title = document.getElementById('workTitle').value.trim();
+      const desc = document.getElementById('workDesc').value.trim();
+      const photoInput = document.getElementById('workPhoto');
+      
+      if (!title || photoInput.files.length === 0) {
+        alert("कृपया शीर्षक और फोटो दोनों का चयन करें!");
+        return;
+      }
+
+      const file = photoInput.files[0];
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const newWork = {
+          id: Date.now(),
+          title: title,
+          desc: desc,
+          photo: evt.target.result,
+          date: new Date().toLocaleDateString('hi-IN')
+        };
+
+        workUpdates.unshift(newWork);
+        localStorage.setItem('ward_work_updates', JSON.stringify(workUpdates));
+
+        document.getElementById('workTitle').value = '';
+        document.getElementById('workDesc').value = '';
+        photoInput.value = '';
+
+        renderWorkUpdates();
+        alert("विकास कार्य की जानकारी सफलतापूर्वक पोस्ट कर दी गई है!");
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function deleteWorkUpdate(id) {
+      if(confirm("क्या आप इस पोस्ट को हटाना चाहते हैं?")) {
+        workUpdates = workUpdates.filter(w => w.id !== id);
+        localStorage.setItem('ward_work_updates', JSON.stringify(workUpdates));
+        renderWorkUpdates();
+      }
+    }
+
+    function renderWorkUpdates() {
+      const container = document.getElementById('worksContainer');
+      if (workUpdates.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full text-center py-6 text-slate-500 border border-dashed border-slate-800 rounded-xl">
+            <i class="fa-solid fa-camera text-3xl mb-2 text-slate-600"></i>
+            <p class="text-xs">हाल में किया गया कोई विकास कार्य अपडेट नहीं है।</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = workUpdates.map(work => `
+        <div class="bg-slate-950 border border-slate-800 rounded-xl overflow-hidden shadow-sm flex flex-col justify-between">
+          <div>
+            <img src="${work.photo}" alt="${work.title}" class="w-full h-40 object-cover border-b border-slate-800">
+            <div class="p-3.5 space-y-1.5">
+              <div class="flex justify-between items-start">
+                <h4 class="text-xs font-bold text-amber-400 line-clamp-2">${work.title}</h4>
+              </div>
+              ${work.desc ? `<p class="text-[11px] text-slate-300 leading-relaxed">${work.desc}</p>` : ''}
+            </div>
+          </div>
+          <div class="p-3 pt-0 flex justify-between items-center text-[10px] text-slate-500 border-t border-slate-900/50 mt-2">
+            <span><i class="fa-solid fa-calendar-day"></i> ${work.date}</span>
+            ${isPanchMode ? `<button onclick="deleteWorkUpdate(${work.id})" class="text-red-400 hover:text-red-300"><i class="fa-solid fa-trash"></i> हटाएं</button>` : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Google Sheet से डेटा Fetch करने का JSONP तरीका
+    function fetchIssuesFromSheet() {
+      if (!SCRIPT_URL || SCRIPT_URL.includes("YOUR_WEB_APP_URL")) {
+        issues = JSON.parse(localStorage.getItem('ward_issues_data')) || [];
+        renderIssues();
+        return;
+      }
+
+      const script = document.createElement('script');
+      const callbackName = 'jsonpFetch_' + Date.now();
+      
+      window[callbackName] = function(data) {
+        if(data && data.result === "success") {
+          issues = data.issues || [];
+          renderIssues();
+        }
+        document.body.removeChild(script);
+        delete window[callbackName];
+      };
+
+      script.src = SCRIPT_URL + "?action=getData&callback=" + callbackName;
+      document.body.appendChild(script);
+    }
+
+    // Google Sheet में अपडेट/स्वीकृत करने का पक्का JSONP तरीका
+    function sendUpdateToSheet(payload, callback) {
+      const script = document.createElement('script');
+      const callbackName = 'jsonpUpdate_' + Date.now();
+      
+      window[callbackName] = function(data) {
+        if (callback) callback();
+        setTimeout(fetchIssuesFromSheet, 1000);
+        document.body.removeChild(script);
+        delete window[callbackName];
+      };
+
+      let queryParams = `action=update&`;
+      for (let key in payload) {
+        if (payload[key] !== undefined && payload[key] !== null) {
+          queryParams += `${encodeURIComponent(key)}=${encodeURIComponent(payload[key])}&`;
+        }
+      }
+      queryParams += `callback=` + callbackName;
+
+      script.src = SCRIPT_URL + "?" + queryParams;
+      document.body.appendChild(script);
+    }
+
+    function handleProfileUpload(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          document.getElementById('headerProfilePic').src = evt.target.result;
+          localStorage.setItem('ward_profile_pic', evt.target.result);
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function addNewCustomLink() {
+      const title = document.getElementById('newLinkTitle').value.trim();
+      const url = document.getElementById('newLinkUrl').value.trim();
+      if(!title || !url) {
+        alert("कृपया शीर्षक और URL दोनों भरें!");
+        return;
+      }
+      customLinks.push({ id: Date.now(), title, url });
+      localStorage.setItem('ward_custom_links', JSON.stringify(customLinks));
+      document.getElementById('newLinkTitle').value = '';
+      document.getElementById('newLinkUrl').value = '';
+      renderCustomLinks();
+      alert("नया लिंक सफलतापूर्वक जोड़ दिया गया है!");
+    }
+
+    function deleteCustomLink(id) {
+      if(confirm("क्या आप इस लिंक को हटाना चाहते हैं?")) {
+        customLinks = customLinks.filter(l => l.id !== id);
+        localStorage.setItem('ward_custom_links', JSON.stringify(customLinks));
+        renderCustomLinks();
+      }
+    }
+
+    function renderCustomLinks() {
+      const container = document.getElementById('dynamicLinksContainer');
+      if(customLinks.length === 0) {
+        container.innerHTML = '';
+        return;
+      }
+      container.innerHTML = customLinks.map(link => `
+        <div class="flex items-center justify-between bg-slate-950 hover:bg-slate-800 border border-slate-800 p-2.5 rounded-xl text-xs text-slate-200">
+          <a href="${link.url}" target="_blank" class="flex items-center gap-2 text-amber-400 font-semibold flex-grow truncate">
+            <i class="fa-solid fa-link"></i> ${link.title}
+          </a>
+          <div class="flex items-center gap-2">
+            <a href="${link.url}" target="_blank" class="text-slate-500 hover:text-white"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+            ${isPanchMode ? `<button onclick="deleteCustomLink(${link.id})" class="text-red-400 hover:text-red-300 ml-2"><i class="fa-solid fa-trash"></i></button>` : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function handleModeClick() {
+      if (!isPanchMode) {
+        document.getElementById('pinInput').value = '';
+        document.getElementById('pinError').classList.add('hidden');
+        document.getElementById('pinModal').classList.remove('hidden');
+      } else {
+        isPanchMode = false;
+        document.getElementById('modeText').innerText = "समाज सेवक मोड (Gurjant Singh)";
+        document.getElementById('modeIcon').className = "fa-solid fa-lock text-amber-400";
+        document.getElementById('uploadPicBtnHeader').classList.add('hidden');
+        document.getElementById('uploadBannerBtn').classList.add('hidden');
+        document.getElementById('adminWorkSection').classList.add('hidden');
+        document.getElementById('unapprovedSection').classList.add('hidden');
+        document.getElementById('futureAdminSpace').classList.add('hidden');
+        renderIssues();
+        renderCustomLinks();
+        renderWorkUpdates();
+      }
+    }
+
+    function closePinModal() {
+      document.getElementById('pinModal').classList.add('hidden');
+    }
+
+    function closeThankYouModal() {
+      document.getElementById('thankYouModal').classList.add('hidden');
+    }
+
+    function verifyPin() {
+      const enteredPin = document.getElementById('pinInput').value;
+      if (enteredPin === ADMIN_PIN) {
+        isPanchMode = true;
+        closePinModal();
+        document.getElementById('modeText').innerText = "नागरिक मोड (Voter View)";
+        document.getElementById('modeIcon').className = "fa-solid fa-unlock text-emerald-400";
+        document.getElementById('uploadPicBtnHeader').classList.remove('hidden');
+        document.getElementById('uploadBannerBtn').classList.remove('hidden');
+        document.getElementById('adminWorkSection').classList.remove('hidden');
+        document.getElementById('unapprovedSection').classList.remove('hidden');
+        document.getElementById('futureAdminSpace').classList.remove('hidden');
+        renderIssues();
+        renderCustomLinks();
+        renderWorkUpdates();
+      } else {
+        document.getElementById('pinError').classList.remove('hidden');
+      }
+    }
+
+    function handleFormSubmit(e) {
+      e.preventDefault();
+      const btn = document.getElementById('submitBtn');
+      if(btn) {
+        btn.innerText = 'सबमिट हो रहा है...';
+        btn.disabled = true;
+      }
+
+      const newIssue = {
+        id: Date.now(),
+        name: document.getElementById('voterName').value,
+        phone: document.getElementById('voterPhone').value,
+        type: document.getElementById('issueType').value,
+        category: document.getElementById('issueCategory').value,
+        details: document.getElementById('issueDetails').value,
+        date: new Date().toLocaleDateString('hi-IN'),
+        status: 'Pending',
+        approved: 'false',
+        reply: ''
+      };
+
+      sendUpdateToSheet(newIssue, () => {
+        if(btn) {
+          btn.innerText = 'सबमिट करें (Submit)';
+          btn.disabled = false;
+        }
+        document.getElementById('issueForm').reset();
+        document.getElementById('thankYouModal').classList.remove('hidden');
+      });
+    }
+
+    function approveIssue(id) {
+      const issue = issues.find(i => String(i.id) === String(id));
+      if(issue) {
+        issue.approved = true;
+        renderIssues();
+        
+        sendUpdateToSheet({
+          id: issue.id,
+          status: issue.status || 'Pending',
+          approved: 'true',
+          reply: issue.reply || ''
+        });
+      }
+    }
+
+    function deleteIssue(id) {
+      if(confirm("क्या आप इस शिकायत को हटाना चाहते हैं?")) {
+        issues = issues.filter(i => String(i.id) !== String(id));
+        renderIssues();
+      }
+    }
+
+    function updateStatus(id, newStatus) {
+      const issue = issues.find(i => String(i.id) === String(id));
+      if(issue) {
+        issue.status = newStatus;
+        renderIssues();
+        sendUpdateToSheet({
+          id: issue.id,
+          status: newStatus,
+          approved: issue.approved ? 'true' : 'false',
+          reply: issue.reply || ''
+        });
+      }
+    }
+
+    function saveReply(id) {
+      const replyInput = document.getElementById(`reply-input-${id}`);
+      const replyText = replyInput ? replyInput.value.trim() : '';
+      const issue = issues.find(i => String(i.id) === String(id));
+
+      if(issue) {
+        issue.reply = replyText;
+        renderIssues();
+        sendUpdateToSheet({
+          id: issue.id,
+          status: issue.status || 'Pending',
+          approved: issue.approved ? 'true' : 'false',
+          reply: replyText
+        }, () => {
+          alert("जवाब दर्ज कर दिया गया है!");
+        });
+      }
+    }
+
+    function renderIssues() {
+      const approvedIssues = issues.filter(i => String(i.approved).toLowerCase() === 'true' || i.approved === true);
+      const unapprovedIssues = issues.filter(i => String(i.approved).toLowerCase() !== 'true' && i.approved !== true);
+
+      if (isPanchMode) {
+        const unapprovedContainer = document.getElementById('unapprovedContainer');
+        document.getElementById('unapprovedCount').innerText = `${unapprovedIssues.length} लंबित`;
+
+        if (unapprovedIssues.length === 0) {
+          unapprovedContainer.innerHTML = `<p class="text-xs text-slate-400 text-center py-2">कोई भी नई अप्रूवल लंबित शिकायत नहीं है।</p>`;
+        } else {
+          unapprovedContainer.innerHTML = unapprovedIssues.map(item => `
+            <div class="bg-slate-950 border border-amber-500/30 rounded-xl p-4 space-y-2">
+              <div class="flex justify-between items-center text-xs">
+                <span class="text-amber-400 font-bold">${item.name} (${item.phone})</span>
+                <span class="text-slate-400">${item.date}</span>
+              </div>
+              <p class="text-xs text-slate-200"><strong>[${item.type} - ${item.category}]:</strong> ${item.details}</p>
+              <div class="flex justify-end gap-2 pt-2 border-t border-slate-900">
+                <button onclick="deleteIssue('${item.id}')" class="bg-red-500/20 text-red-400 hover:bg-red-500/30 border border-red-500/30 text-xs px-3 py-1 rounded-lg font-semibold">रद्द करें</button>
+                <button onclick="approveIssue('${item.id}')" class="bg-emerald-500 text-slate-950 hover:bg-emerald-400 text-xs px-3 py-1 rounded-lg font-bold">स्वीकृत करें</button>
+              </div>
+            </div>
+          `).join('');
+        }
+      }
+
+      const container = document.getElementById('issuesContainer');
+      document.getElementById('totalCount').innerText = `कुल स्वीकृत: ${approvedIssues.length}`;
+
+      if(approvedIssues.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-10 text-slate-500 border border-dashed border-slate-800 rounded-xl">
+            <i class="fa-solid fa-folder-open text-4xl mb-2 text-slate-600"></i>
+            <p>अभी कोई स्वीकृत समस्या या सुझाव प्रदर्शित नहीं है।</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = approvedIssues.map(item => `
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-3 shadow-sm">
+          <div class="flex justify-between items-start gap-2">
+            <div>
+              <span class="text-xs font-semibold px-2 py-0.5 rounded ${item.type === 'समस्या' ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'}">
+                ${item.type}
+              </span>
+              <span class="text-xs text-slate-400 ml-2"><i class="fa-solid fa-tag"></i> ${item.category}</span>
+            </div>
+
+            <span class="text-xs font-bold px-2.5 py-1 rounded-full ${
+              item.status === 'Solved' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
+              item.status === 'In Progress' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
+              'bg-slate-800 text-slate-400'
+            }">
+              ${item.status === 'Solved' ? 'हल किया गया' : item.status === 'In Progress' ? 'कार्य जारी' : 'लंबित'}
+            </span>
+          </div>
+
+          <p class="text-sm text-slate-200">${item.details}</p>
+
+          <div class="flex justify-between items-center text-xs text-slate-500 pt-2 border-t border-slate-900">
+            <span><i class="fa-solid fa-user"></i> ${item.name} (${item.phone})</span>
+            <span><i class="fa-solid fa-calendar"></i> ${item.date}</span>
+          </div>
+
+          ${item.reply ? `
+            <div class="bg-amber-500/10 border-l-2 border-amber-500 p-3 rounded-r-lg mt-2">
+              <p class="text-xs font-bold text-amber-400"><i class="fa-solid fa-reply"></i> Gurjant Singh का उत्तर:</p>
+              <p class="text-xs text-slate-300 mt-1">${item.reply}</p>
+            </div>
+          ` : ''}
+
+          ${isPanchMode ? `
+            <div class="pt-3 mt-2 border-t border-slate-800 space-y-2 bg-slate-900/50 p-2 rounded-lg">
+              <div class="flex justify-between items-center">
+                <span class="text-xs font-bold text-amber-400">प्रशासनिक कार्यवाही:</span>
+                <select onchange="updateStatus('${item.id}', this.value)" class="bg-slate-950 text-xs text-amber-400 border border-slate-700 rounded px-2 py-1 focus:outline-none">
+                  <option value="Pending" ${item.status === 'Pending' ? 'selected' : ''}>Pending (लंबित)</option>
+                  <option value="In Progress" ${item.status === 'In Progress' ? 'selected' : ''}>In Progress (कार्य जारी)</option>
+                  <option value="Solved" ${item.status === 'Solved' ? 'selected' : ''}>Solved (हल किया गया)</option>
+                </select>
+              </div>
+
+              <div class="flex gap-2">
+                <input type="text" id="reply-input-${item.id}" placeholder="आधिकारिक जवाब लिखें..." value="${item.reply || ''}" class="flex-grow bg-slate-950 text-xs text-slate-100 border border-slate-700 rounded px-2 py-1 focus:outline-none">
+                <button onclick="saveReply('${item.id}')" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-3 py-1 rounded text-xs">जवाब दें</button>
+                <button onclick="deleteIssue('${item.id}')" class="bg-red-500/20 text-red-400 px-2 py-1 rounded text-xs border border-red-500/30">Delete</button>
+              </div>
+            </div>
+          ` : ''}
+        </div>
+      `).join('');
+    }
+  </script>
+</body>
+</html>
