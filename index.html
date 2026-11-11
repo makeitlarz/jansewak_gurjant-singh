@@ -20,7 +20,8 @@
       <div class="flex items-center gap-3">
         <div class="relative group">
           <img id="headerProfilePic" src="https://via.placeholder.com/150/1e293b/f59e0b?text=GS" alt="Gurjant Singh" class="w-12 h-12 rounded-full border-2 border-amber-500 object-cover shadow-md">
-          <label id="uploadPicBtnHeader" class="hidden absolute -bottom-1 -right-1 bg-amber-500 text-slate-950 text-xs w-6 h-6 rounded-full flex items-center justify-center cursor-pointer shadow-lg hover:scale-110 transition-all">
+          <!-- Profile Pic Edit Button (Hidden by default, shown when Admin mode is ON) -->
+          <label id="uploadPicBtnHeader" class="hidden absolute -bottom-1 -right-1 bg-amber-500 text-slate-950 text-xs w-6 h-6 rounded-full flex items-center justify-center cursor-pointer shadow-lg hover:scale-110 transition-all z-20">
             <i class="fa-solid fa-camera"></i>
             <input type="file" accept="image/*" class="hidden" onchange="handleProfileUpload(event)">
           </label>
@@ -42,18 +43,18 @@
   <main class="max-w-6xl mx-auto px-4 py-6 flex-grow w-full space-y-6">
 
     <!-- Banner Section -->
-    <div class="relative bg-gradient-to-r from-amber-500/20 via-amber-600/15 to-amber-500/20 border-2 border-amber-500/50 rounded-2xl p-6 md:p-8 text-center shadow-xl overflow-hidden backdrop-blur-sm min-h-[180px] flex flex-col justify-center items-center bg-cover bg-center" id="mainBannerContainer">
+    <div class="relative bg-gradient-to-r from-amber-500/20 via-amber-600/15 to-amber-500/20 border-2 border-amber-500/50 rounded-2xl p-6 md:p-8 text-center shadow-xl overflow-hidden backdrop-blur-sm min-h-[180px] flex flex-col justify-center items-center bg-cover bg-center transition-all" id="mainBannerContainer">
       
-      <!-- Banner Image Upload Button (Admin Only) -->
-      <label id="uploadBannerBtn" class="hidden absolute top-3 right-3 bg-amber-500 text-slate-950 text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 cursor-pointer shadow-lg hover:scale-105 transition-all z-10">
+      <!-- Banner Image Edit Button (Hidden by default, shown when Admin mode is ON) -->
+      <label id="uploadBannerBtn" class="hidden absolute top-3 right-3 bg-amber-500 text-slate-950 text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 cursor-pointer shadow-lg hover:scale-105 transition-all z-20">
         <i class="fa-solid fa-camera"></i> बैनर बदलें
         <input type="file" accept="image/*" class="hidden" onchange="handleBannerUpload(event)">
       </label>
 
-      <!-- Semi transparent overlay for readability -->
+      <!-- Semi transparent overlay for readability if image is set -->
       <div id="bannerOverlay" class="absolute inset-0 bg-slate-950/70 hidden"></div>
 
-      <div class="relative z-0">
+      <div class="relative z-10">
         <p class="text-amber-400 text-xs md:text-sm uppercase tracking-widest font-semibold mb-2">
           <i class="fa-solid fa-star"></i> जनसेवा ही मेरा संकल्प, जनहित ही मेरा लक्ष्य <i class="fa-solid fa-star"></i>
         </p>
@@ -268,7 +269,7 @@
 
   <script>
     const ADMIN_PIN = "3901";
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyHMWCiATEbq471Hr5yv-Jw2_FBeEPHCb0YEAKlZWsLpaxb5tyGJtFlXhPb3279QoHQVg/exec"; 
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwImLsrGXZ9xidoG-q2yiV3NogkTm2FKvDOeRkVclE0FEMzjGG7Ckk-U67Z0cwnc4_rJA/exec"; 
 
     let isPanchMode = false;
     let issues = [];
