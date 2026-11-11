@@ -15,7 +15,7 @@
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between">
 
   <!-- Header -->
-  <header class="bg-slate-900 border-b border-amber-500/20 sticky top-0 z-50 shadow-md">
+  <header class="bg-slate-900 border-b border-amber-500/25 sticky top-0 z-50 shadow-md">
     <div class="max-w-6xl mx-auto px-4 py-3.5 flex flex-wrap justify-between items-center gap-4">
       <div class="flex items-center gap-3">
         <div class="relative group">
@@ -41,27 +41,49 @@
   <!-- Main Content -->
   <main class="max-w-6xl mx-auto px-4 py-6 flex-grow w-full space-y-6">
 
-    <!-- Banner Section with Admin Upload Option -->
-    <div class="relative bg-gradient-to-r from-amber-500/20 via-amber-600/15 to-amber-500/20 border-2 border-amber-500/50 rounded-2xl p-6 md:p-8 text-center shadow-xl overflow-hidden backdrop-blur-sm flex flex-col items-center justify-center">
+    <!-- Banner Section -->
+    <div class="relative bg-slate-900 border-2 border-amber-500/50 rounded-2xl p-4 md:p-6 text-center shadow-xl overflow-hidden backdrop-blur-sm flex flex-col items-center justify-center">
       
-      <!-- Admin Banner Image Upload Button -->
-      <label id="uploadBannerBtn" class="hidden absolute top-3 right-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs px-3 py-1.5 rounded-lg cursor-pointer shadow-md transition-all flex items-center gap-1.5 z-10">
-        <i class="fa-solid fa-image"></i> बैनर फोटो बदलें
+      <!-- Admin Banner Image Control Button -->
+      <label id="uploadBannerBtn" class="hidden absolute top-3 right-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs px-3 py-1.5 rounded-lg cursor-pointer shadow-md transition-all flex items-center gap-1.5 z-20">
+        <i class="fa-solid fa-image"></i> बैनर बदलें / एडिट करें
         <input type="file" accept="image/*" class="hidden" onchange="handleBannerUpload(event)">
       </label>
 
-      <!-- Dynamic Banner Image (Optional Display) -->
-      <div id="bannerImageContainer" class="hidden mb-4 w-full max-h-64 overflow-hidden rounded-xl border border-amber-500/30">
-        <img id="bannerImage" src="" alt="Ward Banner" class="w-full h-full object-cover">
+      <!-- Dynamic Banner Display Container -->
+      <div id="bannerImageContainer" class="hidden mb-4 w-full h-48 md:h-64 overflow-hidden rounded-xl border border-amber-500/30 relative bg-slate-950">
+        <img id="bannerImage" src="" alt="Ward Banner" class="w-full h-full object-cover transition-all duration-75">
       </div>
 
-      <p class="text-amber-400 text-xs md:text-sm uppercase tracking-widest font-semibold mb-2">
+      <!-- Banner Interactive Zoom & Position Controls (Admin Only) -->
+      <div id="bannerControls" class="hidden w-full bg-slate-950/90 border border-amber-500/30 p-3 rounded-xl mb-4 space-y-2 z-10 text-left">
+        <div class="flex justify-between items-center">
+          <span class="text-xs font-bold text-amber-400"><i class="fa-solid fa-sliders"></i> बैनर ज़ूम व फिट एडिटर</span>
+          <button onclick="saveBannerAdjustments()" class="bg-amber-500 text-slate-950 text-xs px-3 py-1 rounded font-bold hover:bg-amber-400">सेटिंग्स सेव करें</button>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+          <div>
+            <label class="block text-slate-400 mb-1">ज़ूम (Zoom Level): <span id="zoomVal" class="text-amber-400 font-bold">100%</span></label>
+            <input type="range" id="bannerZoom" min="100" max="250" value="100" oninput="adjustBannerStyle()" class="w-full accent-amber-500">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">X-पोजीशन (बाएं/दाएं): <span id="posXVal" class="text-amber-400 font-bold">50%</span></label>
+            <input type="range" id="bannerPosX" min="0" max="100" value="50" oninput="adjustBannerStyle()" class="w-full accent-amber-500">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Y-पोजीशन (ऊपर/नीचे): <span id="posYVal" class="text-amber-400 font-bold">50%</span></label>
+            <input type="range" id="bannerPosY" min="0" max="100" value="50" oninput="adjustBannerStyle()" class="w-full accent-amber-500">
+          </div>
+        </div>
+      </div>
+
+      <p class="text-amber-400 text-xs md:text-sm uppercase tracking-widest font-semibold mb-1">
         <i class="fa-solid fa-star"></i> जनसेवा ही मेरा संकल्प, जनहित ही मेरा लक्ष्य <i class="fa-solid fa-star"></i>
       </p>
-      <h2 class="text-2xl md:text-4xl font-extrabold text-white tracking-wide mb-3 leading-tight">
+      <h2 class="text-2xl md:text-4xl font-extrabold text-white tracking-wide mb-2 leading-tight">
         आपका साथ, हमारा प्रयास : Gurjant Singh
       </h2>
-      <div class="inline-flex items-center gap-3 bg-amber-500 text-slate-950 px-6 py-3 rounded-full text-lg md:text-2xl font-black shadow-lg hover:bg-amber-400 transition-all cursor-pointer my-2">
+      <div class="inline-flex items-center gap-3 bg-amber-500 text-slate-950 px-6 py-2.5 rounded-full text-lg md:text-2xl font-black shadow-lg hover:bg-amber-400 transition-all cursor-pointer my-1">
         <i class="fa-solid fa-phone-volume animate-pulse"></i>
         <a href="tel:9587513901">9587513901</a>
       </div>
@@ -78,7 +100,7 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label class="block text-xs text-slate-400 mb-1">कार्य/समाचार का शीर्षक *</label>
-          <input type="text" id="workTitle" placeholder="जैसे: वार्ड 11 में नई नाली का निर्माण पूरा" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-500">
+          <input type="text" id="workTitle" placeholder="जैसे: वार्ड में स्ट्रीट लाइट मरम्मत कार्य पूर्ण" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-500">
         </div>
         <div>
           <label class="block text-xs text-slate-400 mb-1">कार्य की फोटो चुनें *</label>
@@ -90,24 +112,22 @@
         <textarea id="workDesc" rows="2" placeholder="कार्य के बारे में संक्षिप्त जानकारी लिखें..." class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-500"></textarea>
       </div>
       <button onclick="addWorkUpdate()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-4 py-2 rounded-lg text-xs transition-all shadow-md cursor-pointer flex items-center gap-2">
-        <i class="fa-solid fa-upload"></i> नागरिकों के लिए अपडेट पोस्ट करें
+        <i class="fa-solid fa-upload"></i> नागरिकों के लिए लाइव पोस्ट करें
       </button>
     </div>
 
-    <!-- Public View: Ward Works & Progress Gallery -->
+    <!-- Public View: Ward Works Gallery -->
     <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-lg">
       <h3 class="text-lg font-bold text-amber-400 mb-4 flex items-center gap-2">
         <i class="fa-solid fa-images"></i> हालिया विकास कार्य एवं वार्ड प्रगति
       </h3>
-      <div id="worksContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <!-- Work Updates Cards will load here dynamically -->
-      </div>
+      <div id="worksContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
     </div>
 
-    <!-- Forms & Links Grid -->
+    <!-- Forms & Complaints Container -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-      <!-- Form & Links Column -->
+      <!-- Form Column -->
       <div class="lg:col-span-1 space-y-4">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-lg">
           <h3 class="text-lg font-bold text-amber-400 mb-4 flex items-center gap-2">
@@ -183,14 +203,14 @@
         <div id="futureAdminSpace" class="hidden bg-slate-900 border-2 border-dashed border-amber-500/50 rounded-2xl p-6 shadow-xl space-y-4">
           <div class="flex justify-between items-center border-b border-amber-500/20 pb-3">
             <h3 class="text-sm font-bold text-amber-400 flex items-center gap-2">
-              <i class="fa-solid fa-screwdriver-wrench"></i> फ्यूचर एडमिन स्पेस (नया लिंक या जानकारी जोड़ने के लिए)
+              <i class="fa-solid fa-screwdriver-wrench"></i> फ्यूचर एडमिन स्पेस (नया लिंक जोड़ने के लिए)
             </h3>
             <span class="text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded font-bold">Admin Only</span>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
               <label class="block text-xs text-slate-400 mb-1">नया लिंक शीर्षक (Title)</label>
-              <input type="text" id="newLinkTitle" placeholder="जैसे: वार्ड योजना फॉर्म" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-500">
+              <input type="text" id="newLinkTitle" placeholder="जैसे: योजना फॉर्म" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-500">
             </div>
             <div>
               <label class="block text-xs text-slate-400 mb-1">वेबसाइट URL (Link)</label>
@@ -268,12 +288,16 @@
 
   <script>
     const ADMIN_PIN = "3901";
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwJD-PMaBgVwso7_xPyDRz8vOEy9vLxGLaZZNH5qoMbRb56dfHIU407kPp_R0rtwM8l/exec"; 
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwImLsrGXZ9xidoG-q2yiV3NogkTm2FKvDOeRkVclE0FEMzjGG7Ckk-U67Z0cwnc4_rJA/exec"; 
 
     let isPanchMode = false;
     let issues = [];
     let customLinks = JSON.parse(localStorage.getItem('ward_custom_links')) || [];
     let workUpdates = JSON.parse(localStorage.getItem('ward_work_updates')) || [];
+
+    let bannerConfig = JSON.parse(localStorage.getItem('ward_banner_config')) || {
+      img: '', zoom: 100, posX: 50, posY: 50
+    };
 
     window.onload = function() {
       const savedProfile = localStorage.getItem('ward_profile_pic');
@@ -281,32 +305,79 @@
         document.getElementById('headerProfilePic').src = savedProfile;
       }
       
-      const savedBanner = localStorage.getItem('ward_banner_pic');
-      if(savedBanner) {
-        document.getElementById('bannerImage').src = savedBanner;
-        document.getElementById('bannerImageContainer').classList.remove('hidden');
-      }
-
+      applyBannerConfig();
       renderCustomLinks();
       renderWorkUpdates();
       fetchIssuesFromSheet();
     };
 
-    // Banner Photo Upload Handler
+    function applyBannerConfig() {
+      if(bannerConfig.img) {
+        const img = document.getElementById('bannerImage');
+        img.src = bannerConfig.img;
+        img.style.transform = `scale(${bannerConfig.zoom / 100})`;
+        img.style.objectPosition = `${bannerConfig.posX}% ${bannerConfig.posY}%`;
+        document.getElementById('bannerImageContainer').classList.remove('hidden');
+
+        document.getElementById('bannerZoom').value = bannerConfig.zoom;
+        document.getElementById('bannerPosX').value = bannerConfig.posX;
+        document.getElementById('bannerPosY').value = bannerConfig.posY;
+        updateSliderLabels();
+      }
+    }
+
     function handleBannerUpload(e) {
       const file = e.target.files[0];
       if (file) {
         const reader = new FileReader();
         reader.onload = function(evt) {
-          document.getElementById('bannerImage').src = evt.target.result;
-          document.getElementById('bannerImageContainer').classList.remove('hidden');
-          localStorage.setItem('ward_banner_pic', evt.target.result);
+          bannerConfig.img = evt.target.result;
+          bannerConfig.zoom = 100;
+          bannerConfig.posX = 50;
+          bannerConfig.posY = 50;
+          applyBannerConfig();
+          saveBannerConfigToSheet();
+          if(isPanchMode) {
+            document.getElementById('bannerControls').classList.remove('hidden');
+          }
         };
         reader.readAsDataURL(file);
       }
     }
 
-    // Work Update (Photo + Title + Desc) Handler
+    function adjustBannerStyle() {
+      bannerConfig.zoom = document.getElementById('bannerZoom').value;
+      bannerConfig.posX = document.getElementById('bannerPosX').value;
+      bannerConfig.posY = document.getElementById('bannerPosY').value;
+      
+      const img = document.getElementById('bannerImage');
+      img.style.transform = `scale(${bannerConfig.zoom / 100})`;
+      img.style.objectPosition = `${bannerConfig.posX}% ${bannerConfig.posY}%`;
+      updateSliderLabels();
+    }
+
+    function updateSliderLabels() {
+      document.getElementById('zoomVal').innerText = `${bannerConfig.zoom}%`;
+      document.getElementById('posXVal').innerText = `${bannerConfig.posX}%`;
+      document.getElementById('posYVal').innerText = `${bannerConfig.posY}%`;
+    }
+
+    function saveBannerAdjustments() {
+      localStorage.setItem('ward_banner_config', JSON.stringify(bannerConfig));
+      saveBannerConfigToSheet();
+      alert("बैनर ज़ूम और फिट सेटिंग्स सेव कर ली गई हैं!");
+    }
+
+    function saveBannerConfigToSheet() {
+      localStorage.setItem('ward_banner_config', JSON.stringify(bannerConfig));
+      if(SCRIPT_URL && !SCRIPT_URL.includes("YOUR_EXEC_ID")) {
+        sendUpdateToSheet({
+          type: 'saveBanner',
+          bannerData: JSON.stringify(bannerConfig)
+        });
+      }
+    }
+
     function addWorkUpdate() {
       const title = document.getElementById('workTitle').value.trim();
       const desc = document.getElementById('workDesc').value.trim();
@@ -331,12 +402,17 @@
         workUpdates.unshift(newWork);
         localStorage.setItem('ward_work_updates', JSON.stringify(workUpdates));
 
+        sendUpdateToSheet({
+          type: 'saveWorkUpdate',
+          workData: JSON.stringify(newWork)
+        });
+
         document.getElementById('workTitle').value = '';
         document.getElementById('workDesc').value = '';
         photoInput.value = '';
 
         renderWorkUpdates();
-        alert("विकास कार्य की जानकारी सफलतापूर्वक पोस्ट कर दी गई है!");
+        alert("विकास कार्य की जानकारी लाइव पोस्ट कर दी गई है!");
       };
       reader.readAsDataURL(file);
     }
@@ -380,9 +456,8 @@
       `).join('');
     }
 
-    // Google Sheet से डेटा Fetch करने का JSONP तरीका
     function fetchIssuesFromSheet() {
-      if (!SCRIPT_URL || SCRIPT_URL.includes("YOUR_WEB_APP_URL")) {
+      if (!SCRIPT_URL || SCRIPT_URL.includes("YOUR_EXEC_ID")) {
         issues = JSON.parse(localStorage.getItem('ward_issues_data')) || [];
         renderIssues();
         return;
@@ -394,6 +469,18 @@
       window[callbackName] = function(data) {
         if(data && data.result === "success") {
           issues = data.issues || [];
+          if(data.bannerConfig) {
+            try {
+              bannerConfig = JSON.parse(data.bannerConfig);
+              applyBannerConfig();
+            } catch(err){}
+          }
+          if(data.workUpdates) {
+            try {
+              workUpdates = JSON.parse(data.workUpdates);
+              renderWorkUpdates();
+            } catch(err){}
+          }
           renderIssues();
         }
         document.body.removeChild(script);
@@ -404,7 +491,6 @@
       document.body.appendChild(script);
     }
 
-    // Google Sheet में अपडेट/स्वीकृत करने का पक्का JSONP तरीका
     function sendUpdateToSheet(payload, callback) {
       const script = document.createElement('script');
       const callbackName = 'jsonpUpdate_' + Date.now();
@@ -493,6 +579,7 @@
         document.getElementById('modeIcon').className = "fa-solid fa-lock text-amber-400";
         document.getElementById('uploadPicBtnHeader').classList.add('hidden');
         document.getElementById('uploadBannerBtn').classList.add('hidden');
+        document.getElementById('bannerControls').classList.add('hidden');
         document.getElementById('adminWorkSection').classList.add('hidden');
         document.getElementById('unapprovedSection').classList.add('hidden');
         document.getElementById('futureAdminSpace').classList.add('hidden');
@@ -519,6 +606,9 @@
         document.getElementById('modeIcon').className = "fa-solid fa-unlock text-emerald-400";
         document.getElementById('uploadPicBtnHeader').classList.remove('hidden');
         document.getElementById('uploadBannerBtn').classList.remove('hidden');
+        if(bannerConfig.img) {
+          document.getElementById('bannerControls').classList.remove('hidden');
+        }
         document.getElementById('adminWorkSection').classList.remove('hidden');
         document.getElementById('unapprovedSection').classList.remove('hidden');
         document.getElementById('futureAdminSpace').classList.remove('hidden');
