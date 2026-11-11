@@ -9,6 +9,12 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Hind:wght@400;500;600;700&display=swap');
     body { font-family: 'Hind', sans-serif; }
+    /* बैनर का फ्रेम हमेशा फिक्स रहेगा; केवल फोटो की फिटिंग बदलेगी */
+    #mainBannerContainer {
+      background-size: 100% auto;
+      background-position: 50% 50%;
+      background-repeat: no-repeat;
+    }
   </style>
 </head>
 
@@ -42,30 +48,59 @@
   <!-- Main Content -->
   <main class="max-w-6xl mx-auto px-4 py-6 flex-grow w-full space-y-6">
 
-    <!-- Banner Section -->
-    <div class="relative bg-gradient-to-r from-amber-500/20 via-amber-600/15 to-amber-500/20 border-2 border-amber-500/50 rounded-2xl p-6 md:p-8 text-center shadow-xl overflow-hidden backdrop-blur-sm min-h-[180px] flex flex-col justify-center items-center bg-cover bg-center transition-all" id="mainBannerContainer">
+    <!-- Jansewak heading: banner se alag, admin ke dwara badalne yogya -->
+    <section id="jansewakHeading" class="text-center py-2 space-y-1">
+      <h2 class="text-xl md:text-2xl font-extrabold text-amber-400">आपका साथ, हमारा प्रयास</h2>
+      <p class="text-sm md:text-base font-semibold text-slate-200">जनसेवक: <span id="jansewakNameDisplay">Gurjant Singh</span></p>
+      <button id="editJansewakNameBtn" type="button" onclick="editJansewakNamePrompt()" class="hidden mx-auto text-xs text-amber-400 underline">जनसेवक का नाम बदलें</button>
+    </section>
+
+    <!-- Banner Section: is frame mein sirf photo rahegi -->
+    <div class="relative rounded-2xl p-0 text-center shadow-2xl overflow-hidden h-72 md:h-80 bg-slate-900 border-2 border-amber-500/50 bg-no-repeat transition-all" id="mainBannerContainer">
       
       <!-- Banner Image Edit Button (Hidden by default, shown when Admin mode is ON) -->
-      <label id="uploadBannerBtn" class="hidden absolute top-3 right-3 bg-amber-500 text-slate-950 text-xs md:text-sm px-3.5 py-2 rounded-lg font-bold flex items-center gap-2 cursor-pointer shadow-2xl hover:bg-amber-400 hover:scale-105 transition-all z-30 border border-slate-950">
+      <label id="uploadBannerBtn" class="hidden absolute top-4 right-4 bg-amber-500 text-slate-950 text-xs md:text-sm px-4 py-2 rounded-xl font-bold flex items-center gap-2 cursor-pointer shadow-2xl hover:bg-amber-400 hover:scale-105 transition-all z-30 border border-slate-950">
         <i class="fa-solid fa-camera text-base"></i> बैनर बदलें
         <input type="file" accept="image/*" class="hidden" onchange="handleBannerUpload(event)">
       </label>
 
-      <!-- Semi transparent overlay for readability if image is set -->
-      <div id="bannerOverlay" class="absolute inset-0 bg-slate-950/70 hidden z-10"></div>
+      <!-- इस बैनर फ्रेम में केवल फोटो दिखाई देगी; कोई टेक्स्ट/स्लोगन नहीं। -->
+    </div>
 
-      <div class="relative z-20">
-        <p class="text-amber-400 text-xs md:text-sm uppercase tracking-widest font-semibold mb-2">
-          <i class="fa-solid fa-star"></i> जनसेवा ही मेरा संकल्प, जनहित ही मेरा लक्ष्य <i class="fa-solid fa-star"></i>
-        </p>
-        <h2 class="text-2xl md:text-4xl font-extrabold text-white tracking-wide mb-3 leading-tight">
-          आपका साथ, हमारा प्रयास : Gurjant Singh
-        </h2>
-        <div class="inline-flex items-center gap-3 bg-amber-500 text-slate-950 px-6 py-3 rounded-full text-lg md:text-2xl font-black shadow-lg hover:bg-amber-400 transition-all cursor-pointer my-2">
-          <i class="fa-solid fa-phone-volume animate-pulse"></i>
-          <a href="tel:9587513901">9587513901</a>
-        </div>
+    <!-- BANNER EDITOR: केवल Admin Mode में दिखाई देगा -->
+    <div id="bannerEditorPanel" class="hidden bg-slate-900 border-2 border-amber-500/50 rounded-2xl p-5 shadow-xl space-y-4">
+      <div class="flex flex-wrap justify-between items-center gap-2 border-b border-amber-500/20 pb-3">
+        <h3 class="text-base font-bold text-amber-400"><i class="fa-solid fa-sliders"></i> बैनर फोटो एडिटर</h3>
+        <span class="text-xs text-slate-400">फ्रेम का आकार फिक्स रहेगा</span>
       </div>
+      <p class="text-xs text-slate-300">फोटो अपलोड करने के बाद नीचे दिए कंट्रोल से उसे बैनर में फिट करें। बदलाव पहले ऊपर बैनर में दिखाई देंगे।</p>
+      <div class="rounded-xl border border-amber-500/20 bg-slate-950 p-3 space-y-2">
+        <h4 class="text-sm font-bold text-amber-400">जनसेवक का नाम बदलें</h4>
+        <label class="block text-xs text-slate-300">यह नाम बैनर के ऊपर दिखेगा
+          <input id="jansewakNameInput" type="text" maxlength="60" value="Gurjant Singh" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white" placeholder="जनसेवक का नाम">
+        </label>
+        <button type="button" onclick="saveJansewakName()" class="bg-amber-500 text-slate-950 px-4 py-2 rounded-lg text-xs font-bold">नाम सेव करें</button>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <label class="text-xs text-slate-300">
+          Zoom: <strong id="bannerZoomValue" class="text-amber-400">100%</strong>
+          <input id="bannerZoom" type="range" min="100" max="220" value="100" step="1" class="w-full mt-2 accent-amber-500" oninput="previewBannerSettings()">
+        </label>
+        <label class="text-xs text-slate-300">
+          फोटो Left–Right: <strong id="bannerXValue" class="text-amber-400">50%</strong>
+          <input id="bannerX" type="range" min="0" max="100" value="50" step="1" class="w-full mt-2 accent-amber-500" oninput="previewBannerSettings()">
+        </label>
+        <label class="text-xs text-slate-300">
+          फोटो Up–Down: <strong id="bannerYValue" class="text-amber-400">50%</strong>
+          <input id="bannerY" type="range" min="0" max="100" value="50" step="1" class="w-full mt-2 accent-amber-500" oninput="previewBannerSettings()">
+        </label>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <button type="button" onclick="resetBannerSettings()" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg text-xs font-semibold">रीसेट</button>
+        <button type="button" onclick="saveBannerEditor()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-4 py-2 rounded-lg text-xs font-bold">बैनर सेव करें</button>
+        <button type="button" onclick="cancelBannerEditor()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-lg text-xs font-semibold">रद्द करें</button>
+      </div>
+      <p class="text-[11px] text-slate-500">नोट: सेव करने पर फोटो और उसकी फिटिंग सेटिंग Google Sheet में भेजी जाएगी। बहुत बड़ी फोटो के लिए पहले उसे छोटा करके अपलोड करें।</p>
     </div>
 
     <!-- ADMIN WORK UPLOAD SECTION -->
@@ -269,7 +304,7 @@
 
   <script>
     const ADMIN_PIN = "3901";
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwImLsrGXZ9xidoG-q2yiV3NogkTm2FKvDOeRkVclE0FEMzjGG7Ckk-U67Z0cwnc4_rJA/exec"; 
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzVwCRkHn7uGOq82d8ESSN-JNTpVNJzsMLG3oezla9vFzFfGeP5AJZFZRHD3X6GwVenmA/exec"; 
 
     let isPanchMode = false;
     let issues = [];
@@ -277,16 +312,129 @@
     let workUpdates = JSON.parse(localStorage.getItem('ward_work_updates')) || [];
 
     window.onload = function() {
+      renderJansewakName();
       fetchDataFromSheet();
     };
 
+    let currentBannerImage = '';
+    let bannerConfig = { zoom: 100, x: 50, y: 50 };
+    let pendingBannerImage = '';
+    let jansewakName = localStorage.getItem('ward_jansewak_name') || 'Gurjant Singh';
+
+    function renderJansewakName() {
+      const display = document.getElementById('jansewakNameDisplay');
+      const input = document.getElementById('jansewakNameInput');
+      if (display) display.textContent = jansewakName;
+      if (input) input.value = jansewakName;
+    }
+
+    function editJansewakNamePrompt() {
+      const value = prompt('नया जनसेवक नाम लिखें:', jansewakName);
+      if (value === null) return;
+      const cleanValue = value.trim();
+      if (!cleanValue) { alert('कृपया जनसेवक का नाम लिखें।'); return; }
+      jansewakName = cleanValue;
+      localStorage.setItem('ward_jansewak_name', jansewakName);
+      renderJansewakName();
+      saveSettingToSheet('jansewakName', jansewakName);
+      alert('जनसेवक का नाम सेव कर दिया गया है।');
+    }
+
+    function saveJansewakName() {
+      const input = document.getElementById('jansewakNameInput');
+      const value = (input.value || '').trim();
+      if (!value) { alert('कृपया जनसेवक का नाम लिखें।'); return; }
+      jansewakName = value;
+      localStorage.setItem('ward_jansewak_name', jansewakName);
+      renderJansewakName();
+      saveSettingToSheet('jansewakName', jansewakName);
+      alert('जनसेवक का नाम सेव कर दिया गया है।');
+    }
+
     function setBannerImage(imgUrl) {
       const banner = document.getElementById('mainBannerContainer');
-      const overlay = document.getElementById('bannerOverlay');
       if(imgUrl) {
-        banner.style.backgroundImage = `url('${imgUrl}')`;
-        overlay.classList.remove('hidden');
+        currentBannerImage = imgUrl;
+        banner.style.backgroundImage = `url("${imgUrl}")`;
       }
+      applyBannerConfig();
+    }
+
+    function applyBannerConfig() {
+      const banner = document.getElementById('mainBannerContainer');
+      banner.style.backgroundSize = `${bannerConfig.zoom}% auto`;
+      banner.style.backgroundPosition = `${bannerConfig.x}% ${bannerConfig.y}%`;
+    }
+
+    function loadBannerConfig(config) {
+      if (!config) return;
+      try {
+        const parsed = typeof config === 'string' ? JSON.parse(config) : config;
+        bannerConfig = {
+          zoom: Number(parsed.zoom) || 100,
+          x: Number.isFinite(Number(parsed.x)) ? Number(parsed.x) : 50,
+          y: Number.isFinite(Number(parsed.y)) ? Number(parsed.y) : 50
+        };
+        syncBannerControls();
+        applyBannerConfig();
+      } catch (e) {
+        console.warn('Banner settings could not be loaded', e);
+      }
+    }
+
+    function syncBannerControls() {
+      const values = {
+        bannerZoom: bannerConfig.zoom,
+        bannerX: bannerConfig.x,
+        bannerY: bannerConfig.y
+      };
+      Object.entries(values).forEach(([id, value]) => {
+        const control = document.getElementById(id);
+        if (control) control.value = value;
+      });
+      document.getElementById('bannerZoomValue').innerText = `${bannerConfig.zoom}%`;
+      document.getElementById('bannerXValue').innerText = `${bannerConfig.x}%`;
+      document.getElementById('bannerYValue').innerText = `${bannerConfig.y}%`;
+    }
+
+    function previewBannerSettings() {
+      bannerConfig = {
+        zoom: Number(document.getElementById('bannerZoom').value),
+        x: Number(document.getElementById('bannerX').value),
+        y: Number(document.getElementById('bannerY').value)
+      };
+      syncBannerControls();
+      applyBannerConfig();
+    }
+
+    function resetBannerSettings() {
+      bannerConfig = { zoom: 100, x: 50, y: 50 };
+      syncBannerControls();
+      applyBannerConfig();
+    }
+
+    function cancelBannerEditor() {
+      pendingBannerImage = '';
+      const savedImage = localStorage.getItem('ward_banner_pic') || currentBannerImage;
+      if (savedImage) setBannerImage(savedImage);
+      const savedConfig = localStorage.getItem('ward_banner_config');
+      if (savedConfig) loadBannerConfig(savedConfig);
+      else loadBannerConfig(null);
+      document.getElementById('bannerEditorPanel').classList.add('hidden');
+    }
+
+    function saveBannerEditor() {
+      if (pendingBannerImage) {
+        currentBannerImage = pendingBannerImage;
+        localStorage.setItem('ward_banner_pic', currentBannerImage);
+        saveSettingToSheet('bannerPic', currentBannerImage);
+        pendingBannerImage = '';
+      }
+      localStorage.setItem('ward_banner_config', JSON.stringify(bannerConfig));
+      saveSettingToSheet('bannerConfig', JSON.stringify(bannerConfig));
+      applyBannerConfig();
+      document.getElementById('bannerEditorPanel').classList.add('hidden');
+      alert('बैनर और उसकी फिटिंग सेटिंग सेव कर दी गई है।');
     }
 
     function fetchDataFromSheet() {
@@ -298,6 +446,11 @@
           issues = data.issues || [];
           
           if(data.settings) {
+            if(data.settings.jansewakName) {
+              jansewakName = data.settings.jansewakName;
+              localStorage.setItem('ward_jansewak_name', jansewakName);
+              renderJansewakName();
+            }
             if(data.settings.profilePic) {
               document.getElementById('headerProfilePic').src = data.settings.profilePic;
               localStorage.setItem('ward_profile_pic', data.settings.profilePic);
@@ -305,6 +458,13 @@
             if(data.settings.bannerPic) {
               setBannerImage(data.settings.bannerPic);
               localStorage.setItem('ward_banner_pic', data.settings.bannerPic);
+            }
+            if(data.settings.bannerConfig) {
+              loadBannerConfig(data.settings.bannerConfig);
+              localStorage.setItem('ward_banner_config', typeof data.settings.bannerConfig === 'string' ? data.settings.bannerConfig : JSON.stringify(data.settings.bannerConfig));
+            } else {
+              const localBannerConfig = localStorage.getItem('ward_banner_config');
+              if (localBannerConfig) loadBannerConfig(localBannerConfig);
             }
             if(data.settings.workUpdates) {
               try {
@@ -349,16 +509,17 @@
     }
 
     function saveSettingToSheet(key, value) {
-      const script = document.createElement('script');
-      const callbackName = 'jsonpSetting_' + Date.now();
-      
-      window[callbackName] = function(data) {
-        document.body.removeChild(script);
-        delete window[callbackName];
-      };
-
-      script.src = `${SCRIPT_URL}?action=saveSettings&key=${encodeURIComponent(key)}&value=${encodeURIComponent(value)}&callback=${callbackName}`;
-      document.body.appendChild(script);
+      // POST keeps large image data out of the URL. Apps Script stores images in Drive
+      // and saves only their public view URL in the Settings sheet.
+      fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'saveSettings', key: key, value: value })
+      }).catch(function(error) {
+        console.error('सेटिंग सेव नहीं हो सकी:', error);
+        alert('सेटिंग भेजने में समस्या आई। इंटरनेट और Apps Script deployment जाँचें।');
+      });
     }
 
     function handleProfileUpload(e) {
@@ -378,17 +539,28 @@
 
     function handleBannerUpload(e) {
       const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(evt) {
-          const bannerUrl = evt.target.result;
-          setBannerImage(bannerUrl);
-          localStorage.setItem('ward_banner_pic', bannerUrl);
-          saveSettingToSheet('bannerPic', bannerUrl);
-          alert("बैनर फोटो अपडेट और सेव हो गई है!");
-        };
-        reader.readAsDataURL(file);
+      if (!file) return;
+      if (!file.type.startsWith('image/')) {
+        alert('कृपया JPG, PNG या WebP फोटो चुनें।');
+        e.target.value = '';
+        return;
       }
+      if (file.size > 3 * 1024 * 1024) {
+        alert('यह फोटो 3 MB से बड़ी है। कृपया पहले फोटो का साइज कम करें, ताकि सेव करने में समस्या न आए।');
+        e.target.value = '';
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        pendingBannerImage = evt.target.result;
+        setBannerImage(pendingBannerImage);
+        const savedConfig = localStorage.getItem('ward_banner_config');
+        if (savedConfig) loadBannerConfig(savedConfig);
+        else resetBannerSettings();
+        document.getElementById('bannerEditorPanel').classList.remove('hidden');
+      };
+      reader.readAsDataURL(file);
+      e.target.value = '';
     }
 
     function addWorkUpdate() {
@@ -523,6 +695,8 @@
         document.getElementById('modeIcon').className = "fa-solid fa-lock text-amber-400";
         document.getElementById('uploadPicBtnHeader').classList.add('hidden');
         document.getElementById('uploadBannerBtn').classList.add('hidden');
+        document.getElementById('editJansewakNameBtn').classList.add('hidden');
+        document.getElementById('bannerEditorPanel').classList.add('hidden');
         document.getElementById('unapprovedSection').classList.add('hidden');
         document.getElementById('futureAdminSpace').classList.add('hidden');
         document.getElementById('workUploadAdminSection').classList.add('hidden');
@@ -549,6 +723,8 @@
         document.getElementById('modeIcon').className = "fa-solid fa-unlock text-emerald-400";
         document.getElementById('uploadPicBtnHeader').classList.remove('hidden');
         document.getElementById('uploadBannerBtn').classList.remove('hidden');
+        document.getElementById('editJansewakNameBtn').classList.remove('hidden');
+        document.getElementById('bannerEditorPanel').classList.add('hidden');
         document.getElementById('unapprovedSection').classList.remove('hidden');
         document.getElementById('futureAdminSpace').classList.remove('hidden');
         document.getElementById('workUploadAdminSection').classList.remove('hidden');
